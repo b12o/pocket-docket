@@ -12,7 +12,6 @@ import (
 func GetCount(app *pocketbase.PocketBase) (int, error) {
 	record, err := app.Dao().FindRecordById("Counter", "loh30i7ry1384ep")
 	if err != nil {
-		// TODO http responses should be handled by handler. Return err instead
 		return -1, echo.NewHTTPError(http.StatusInternalServerError, "Could not access collection 'Counter'")
 	}
 
@@ -23,7 +22,6 @@ func GetCount(app *pocketbase.PocketBase) (int, error) {
 func UpdateCount(app *pocketbase.PocketBase, newVal int) error {
 	record, err := app.Dao().FindRecordById("Counter", "loh30i7ry1384ep")
 	if err != nil {
-		// TODO http responses should be handled by handler. Return err instead
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not access collection 'Counter'")
 	}
 
@@ -36,6 +34,21 @@ func UpdateCount(app *pocketbase.PocketBase, newVal int) error {
 
 func AddUserRecord(app *pocketbase.PocketBase, newUser User) error {
 	users, err := app.Dao().FindCollectionByNameOrId("users")
-
+	if err != nil {
+		return err
+	}
+	newUserRecord := models.NewRecord(users)
+	form := forms.NewRecordUpsert(app, newUserRecord)
+	form.LoadData(
+		map[string]any{
+			"username":      newUser.Username,
+			"email":         newUser.Email,
+			"password_hash": newUser.PasswordHash,
+			"password_salt": newUser.PasswordSalt,
+		},
+	)
+	if err := form.Submit(); err != nil {
+		return err
+	}
 	return nil
 }
