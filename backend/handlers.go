@@ -68,5 +68,16 @@ func UpdateUserHandler(c echo.Context) error {
 }
 
 func DeleteUserHandler(c echo.Context) error {
-	return c.String(http.StatusOK, "")
+	app, ok := c.Get("app").(*pocketbase.PocketBase)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
+	}
+	userId := c.PathParam("userid")
+
+	user, err := GetUserRecord(app, userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "User does not exist")
+	}
+	return c.String(http.StatusOK, user.Id)
+
 }
