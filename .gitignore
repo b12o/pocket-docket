@@ -29,4 +29,7 @@ pb_data
 # environment files
 *.env
 
+# misc
+notes.txt
+
 
