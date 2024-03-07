@@ -56,17 +56,17 @@ func CreateUserHandler(c echo.Context) error {
 	if err := AddUserRecord(app, newUser); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to add user to collection")
 	}
-	return c.String(http.StatusCreated, "201 Created")
+	return c.String(http.StatusCreated, "")
 }
 
 func GetUserHandler(c echo.Context) error {
-	return c.String(http.StatusOK, "In GetUserHandler")
+	return c.String(http.StatusOK, "")
 }
 
 func UpdateUserHandler(c echo.Context) error {
-	return c.String(http.StatusOK, "In UpdateUserHandler")
+	return c.String(http.StatusOK, "")
 }
 
 func DeleteUserHandler(c echo.Context) error {
-	return c.String(http.StatusOK, "In DeleteUserHandler")
+	return c.String(http.StatusOK, "")
 }
