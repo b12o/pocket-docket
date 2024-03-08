@@ -52,7 +52,7 @@ func AddUserRecord(app *pocketbase.PocketBase, newUser User) error {
 	}
 	return nil
 }
-
+// test
 func GetUserRecord(app *pocketbase.PocketBase, userId string) (User, error) {
 	var user User
 	return user, nil
