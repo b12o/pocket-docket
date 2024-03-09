@@ -32,10 +32,10 @@ func UpdateCount(app *pocketbase.PocketBase, newVal int) error {
 	return nil
 }
 
-func AddUserRecord(app *pocketbase.PocketBase, newUser User) error {
+func AddUserRecord(app *pocketbase.PocketBase, newUser User) (*models.Record, error) {
 	users, err := app.Dao().FindCollectionByNameOrId("users")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	newUserRecord := models.NewRecord(users)
 	form := forms.NewRecordUpsert(app, newUserRecord)
@@ -48,14 +48,27 @@ func AddUserRecord(app *pocketbase.PocketBase, newUser User) error {
 		},
 	)
 	if err := form.Submit(); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return newUserRecord, nil
 }
 
 func GetUserRecord(app *pocketbase.PocketBase, userId string) (*models.Record, error) {
 	record, err := app.Dao().FindRecordById("users", userId)
 	if err != nil {
+		return nil, err
+	}
+	return record, nil
+}
+
+func UpdateUserRecord(
+	app *pocketbase.PocketBase,
+	record *models.Record,
+	updates map[string]any) (*models.Record, error) {
+
+	form := forms.NewRecordUpsert(app, record)
+	form.LoadData(updates)
+	if err := form.Submit(); err != nil {
 		return nil, err
 	}
 	return record, nil

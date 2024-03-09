@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
@@ -53,10 +54,11 @@ func CreateUserHandler(c echo.Context) error {
 	if err := c.Bind(&newUser); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to create new user object")
 	}
-	if err := AddUserRecord(app, newUser); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to add user to collection")
+	newUserRecord, err := AddUserRecord(app, newUser)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Unable to add user to collection")
 	}
-	return c.String(http.StatusCreated, "")
+	return c.JSON(http.StatusCreated, newUserRecord)
 }
 
 func GetUserHandler(c echo.Context) error {
@@ -73,7 +75,27 @@ func GetUserHandler(c echo.Context) error {
 }
 
 func UpdateUserHandler(c echo.Context) error {
-	return c.String(http.StatusOK, "")
+	app, ok := c.Get("app").(*pocketbase.PocketBase)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
+	}
+	userId := c.PathParam("userId")
+
+	var updates map[string]any
+	if err := json.NewDecoder(c.Request().Body).Decode(&updates); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to parse update request")
+	}
+
+	userRecord, err := GetUserRecord(app, userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "User does not exist")
+	}
+
+	updatedUserRecord, err := UpdateUserRecord(app, userRecord, updates)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to update user record")
+	}
+	return c.JSON(http.StatusOK, updatedUserRecord)
 }
 
 func DeleteUserHandler(c echo.Context) error {
@@ -83,12 +105,12 @@ func DeleteUserHandler(c echo.Context) error {
 	}
 	userId := c.PathParam("userId")
 
-	user, err := GetUserRecord(app, userId)
+	userRecord, err := GetUserRecord(app, userId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "User does not exist")
 	}
-	if err := DeleteUserRecord(app, user); err != nil {
+	if err := DeleteUserRecord(app, userRecord); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "User could not be deleted")
 	}
-	return c.String(http.StatusNoContent, user.Id)
+	return c.String(http.StatusNoContent, "")
 }
