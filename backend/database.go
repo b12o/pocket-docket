@@ -52,8 +52,11 @@ func AddUserRecord(app *pocketbase.PocketBase, newUser User) error {
 	}
 	return nil
 }
-// test
-func GetUserRecord(app *pocketbase.PocketBase, userId string) (User, error) {
-	var user User
-	return user, nil
+
+func GetUserRecord(app *pocketbase.PocketBase, userId string) (*models.Record, error) {
+	record, err := app.Dao().FindRecordById("users", userId)
+	if err != nil {
+		return nil, err
+	}
+	return record, nil
 }

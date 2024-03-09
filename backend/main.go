@@ -27,9 +27,9 @@ func main() {
 	RegisterRoute(app, "POST", "/counter", CountHandler)
 
 	RegisterRoute(app, "POST", "/users", CreateUserHandler)
-	RegisterRoute(app, "GET", "/users/:userid", GetUserHandler)
-	RegisterRoute(app, "PATCH", "/users/:userid", UpdateUserHandler)
-	RegisterRoute(app, "DELETE", "/users/:userid", DeleteUserHandler)
+	RegisterRoute(app, "GET", "/users/:userId", GetUserHandler)
+	RegisterRoute(app, "PATCH", "/users/:userId", UpdateUserHandler)
+	RegisterRoute(app, "DELETE", "/users/:userId", DeleteUserHandler)
 
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
