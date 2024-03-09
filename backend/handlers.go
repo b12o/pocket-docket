@@ -87,6 +87,8 @@ func DeleteUserHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "User does not exist")
 	}
-	return c.String(http.StatusOK, user.Id)
-
+	if err := DeleteUserRecord(app, user); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "User could not be deleted")
+	}
+	return c.String(http.StatusNoContent, user.Id)
 }
