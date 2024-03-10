@@ -1,9 +1,6 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/forms"
 	"github.com/pocketbase/pocketbase/models"
@@ -12,7 +9,7 @@ import (
 func GetCount(app *pocketbase.PocketBase) (int, error) {
 	record, err := app.Dao().FindRecordById("Counter", "loh30i7ry1384ep")
 	if err != nil {
-		return -1, echo.NewHTTPError(http.StatusInternalServerError, "Could not access collection 'Counter'")
+		return -1, err
 	}
 
 	value := record.GetInt("Value")
@@ -22,7 +19,7 @@ func GetCount(app *pocketbase.PocketBase) (int, error) {
 func UpdateCount(app *pocketbase.PocketBase, newVal int) error {
 	record, err := app.Dao().FindRecordById("Counter", "loh30i7ry1384ep")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Could not access collection 'Counter'")
+		return err
 	}
 
 	record.Set("Value", newVal)
