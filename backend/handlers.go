@@ -51,7 +51,7 @@ func CreateUserHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 	var newUser User
-	if err := c.Bind(&newUser); err != nil {
+	if err := json.NewDecoder(c.Request().Body).Decode(&newUser); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to create new user object")
 	}
 	newUserRecord, err := AddUserRecord(app, newUser)
