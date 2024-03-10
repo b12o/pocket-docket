@@ -31,6 +31,11 @@ func main() {
 	RegisterRoute(app, "PATCH", "/users/:userId", UpdateUserHandler)
 	RegisterRoute(app, "DELETE", "/users/:userId", DeleteUserHandler)
 
+	RegisterRoute(app, "POST", "/tasks", CreateTaskHandler)
+	RegisterRoute(app, "GET", "/task/:taskId", GetTaskHandler)
+	RegisterRoute(app, "PATCH", "/tasks/:taskId", UpdateTaskHandler)
+	RegisterRoute(app, "DELETE", "/tasks/:taskId", DeleteTaskHandler)
+
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}

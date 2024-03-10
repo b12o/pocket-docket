@@ -45,6 +45,8 @@ func CountHandler(c echo.Context) error {
 	return echo.NewHTTPError(http.StatusInternalServerError, "Unknown HTTP Request")
 }
 
+// --- USER Handlers ---
+
 func CreateUserHandler(c echo.Context) error {
 	app, ok := c.Get("app").(*pocketbase.PocketBase)
 	if !ok {
@@ -113,4 +115,22 @@ func DeleteUserHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "User could not be deleted")
 	}
 	return c.String(http.StatusNoContent, "")
+}
+
+// --- TASK Handlers ---
+
+func CreateTaskHandler(c echo.Context) error {
+	return nil
+}
+
+func GetTaskHandler(c echo.Context) error {
+	return nil
+}
+
+func UpdateTaskHandler(c echo.Context) error {
+	return nil
+}
+
+func DeleteTaskHandler(c echo.Context) error {
+	return nil
 }
