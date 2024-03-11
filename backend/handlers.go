@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v5"
 )
@@ -22,9 +23,7 @@ func CountHandler(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Unable to retrieve Counter value")
 		}
-		payload := Response{
-			Data: countValue,
-		}
+		payload := map[string]int{"data": countValue}
 		return c.JSON(http.StatusOK, payload)
 	}
 
@@ -84,7 +83,7 @@ func UpdateUserHandler(c echo.Context) error {
 
 	var updates map[string]any
 	if err := json.NewDecoder(c.Request().Body).Decode(&updates); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Failed to parse update request")
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to map request body")
 	}
 
 	userRecord, err := GetUserRecord(app, userId)
@@ -119,7 +118,32 @@ func DeleteUserHandler(c echo.Context) error {
 // --- TASK Handlers ---
 
 func CreateTaskHandler(c echo.Context) error {
-	return nil
+	app, err := GetPocketbaseInstance(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
+	}
+
+	authUserId := c.Request().Header.Get("Authentication")
+	if len(strings.TrimSpace(authUserId)) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
+	}
+
+	if !UserExistsInCollection(app, authUserId) {
+		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist in collection 'users'")
+	}
+
+	var newTask Task
+	newTask.CreatedBy = authUserId
+	if err := json.NewDecoder(c.Request().Body).Decode(&newTask); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to map request body")
+	}
+	// TODO: validate content of request body. For now I'll assume it's correct cuz I'm tired
+	newTaskRecord, err := AddTaskRecord(app, newTask)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Not yet implemented")
+	}
+
+	return c.JSON(http.StatusCreated, newTaskRecord)
 }
 
 func GetTaskHandler(c echo.Context) error {
@@ -131,5 +155,5 @@ func UpdateTaskHandler(c echo.Context) error {
 }
 
 func DeleteTaskHandler(c echo.Context) error {
-	return nil
+	return c.String(http.StatusNoContent, "")
 }

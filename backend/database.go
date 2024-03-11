@@ -29,6 +29,13 @@ func UpdateCount(app *pocketbase.PocketBase, newVal int) error {
 	return nil
 }
 
+// --- USER Record Operations ---
+
+func UserExistsInCollection(app *pocketbase.PocketBase, userId string) bool {
+	_, err := app.Dao().FindRecordById("users", userId)
+	return err == nil
+}
+
 func AddUserRecord(app *pocketbase.PocketBase, newUser User) (*models.Record, error) {
 	users, err := app.Dao().FindCollectionByNameOrId("users")
 	if err != nil {
@@ -77,3 +84,30 @@ func DeleteUserRecord(app *pocketbase.PocketBase, record *models.Record) error {
 	}
 	return nil
 }
+
+// --- TASK Record Operations ---
+
+func AddTaskRecord(app *pocketbase.PocketBase, newTask Task) (*models.Record, error) {
+	tasks, err := app.Dao().FindCollectionByNameOrId("tasks")
+	if err != nil {
+		return nil, err
+	}
+	newTaskRecord := models.NewRecord(tasks)
+	form := forms.NewRecordUpsert(app, newTaskRecord)
+	form.LoadData(
+		map[string]any{
+			"title":       newTask.Title,
+			"description": newTask.Description,
+			"completed":   newTask.Completed,
+			"priority":    newTask.Priority,
+			"created_by":  newTask.CreatedBy,
+		},
+	)
+	if err := form.Submit(); err != nil {
+		return nil, err
+	}
+	return newTaskRecord, nil
+}
+func GetTaskRecord() error    { return nil }
+func UpdateTaskRecord() error { return nil }
+func DeleteTaskRecord() error { return nil }

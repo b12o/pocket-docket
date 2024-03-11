@@ -38,7 +38,7 @@ func RegisterRoute(
 func GetPocketbaseInstance(c echo.Context) (*pocketbase.PocketBase, error) {
 	app, ok := c.Get("app").(*pocketbase.PocketBase)
 	if !ok {
-		return nil, fmt.Errorf("pocketbase instance is not avaiable")
+		return nil, fmt.Errorf("Pocketbase instance is not avaiable")
 	}
 	return app, nil
 }

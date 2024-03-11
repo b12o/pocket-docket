@@ -1,23 +1,22 @@
 package main
 
-import (
-	"time"
-)
-
-type Response struct {
-	Data any `json:"data"`
-}
-
 type UpdateCounterRequest struct {
 	NewVal int `json:"newVal"`
 }
 
 type User struct {
-	Id           string    `json:"id"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"password_hash"`
-	PasswordSalt string    `json:"password_salt"`
-	CreatedAt    time.Time `json:"created"`
-	UpdatedAt    time.Time `json:"updated"`
+	Id           string `db:"id" json:"id"`
+	Username     string `db:"usename" json:"username"`
+	Email        string `db:"email" json:"email"`
+	PasswordHash string `db:"password_hash" json:"password_hash"`
+	PasswordSalt string `db:"password_salt" json:"password_salt"`
+}
+
+type Task struct {
+	Id          string `db:"id" json:"id"`
+	Title       string `db:"title" json:"title"`
+	Description string `db:"description" json:"description"`
+	Completed   bool   `db:"completed" json:"completed"`
+	Priority    string `db:"priority" json:"priority"`
+	CreatedBy   string `db:"created_by" json:"created_by"`
 }
