@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
@@ -31,4 +33,12 @@ func RegisterRoute(
 		}
 		return nil
 	})
+}
+
+func GetPocketbaseInstance(c echo.Context) (*pocketbase.PocketBase, error) {
+	app, ok := c.Get("app").(*pocketbase.PocketBase)
+	if !ok {
+		return nil, fmt.Errorf("pocketbase instance is not avaiable")
+	}
+	return app, nil
 }

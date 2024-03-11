@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v5"
-	"github.com/pocketbase/pocketbase"
 )
 
 func RootHandler(c echo.Context) error {
@@ -13,8 +12,8 @@ func RootHandler(c echo.Context) error {
 }
 
 func CountHandler(c echo.Context) error {
-	app, ok := c.Get("app").(*pocketbase.PocketBase)
-	if !ok {
+	app, err := GetPocketbaseInstance(c)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 
@@ -48,8 +47,8 @@ func CountHandler(c echo.Context) error {
 // --- USER Handlers ---
 
 func CreateUserHandler(c echo.Context) error {
-	app, ok := c.Get("app").(*pocketbase.PocketBase)
-	if !ok {
+	app, err := GetPocketbaseInstance(c)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 	var newUser User
@@ -64,8 +63,8 @@ func CreateUserHandler(c echo.Context) error {
 }
 
 func GetUserHandler(c echo.Context) error {
-	app, ok := c.Get("app").(*pocketbase.PocketBase)
-	if !ok {
+	app, err := GetPocketbaseInstance(c)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 	userId := c.PathParam("userId")
@@ -77,8 +76,8 @@ func GetUserHandler(c echo.Context) error {
 }
 
 func UpdateUserHandler(c echo.Context) error {
-	app, ok := c.Get("app").(*pocketbase.PocketBase)
-	if !ok {
+	app, err := GetPocketbaseInstance(c)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 	userId := c.PathParam("userId")
@@ -101,8 +100,8 @@ func UpdateUserHandler(c echo.Context) error {
 }
 
 func DeleteUserHandler(c echo.Context) error {
-	app, ok := c.Get("app").(*pocketbase.PocketBase)
-	if !ok {
+	app, err := GetPocketbaseInstance(c)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 	userId := c.PathParam("userId")
