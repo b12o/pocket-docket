@@ -7,7 +7,7 @@ import (
 )
 
 func GetCount(app *pocketbase.PocketBase) (int, error) {
-	record, err := app.Dao().FindRecordById("Counter", "loh30i7ry1384ep")
+	record, err := app.Dao().FindRecordById("counter", "loh30i7ry1384ep")
 	if err != nil {
 		return -1, err
 	}
@@ -17,7 +17,7 @@ func GetCount(app *pocketbase.PocketBase) (int, error) {
 }
 
 func UpdateCount(app *pocketbase.PocketBase, newVal int) error {
-	record, err := app.Dao().FindRecordById("Counter", "loh30i7ry1384ep")
+	record, err := app.Dao().FindRecordById("counter", "loh30i7ry1384ep")
 	if err != nil {
 		return err
 	}
