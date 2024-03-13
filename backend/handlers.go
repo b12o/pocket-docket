@@ -51,7 +51,7 @@ func CreateUserHandler(c echo.Context) error {
 	}
 	var newUser User
 	if err := json.NewDecoder(c.Request().Body).Decode(&newUser); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to create new user object")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user format")
 	}
 	newUserRecord, err := AddUserRecord(app, newUser)
 	if err != nil {
