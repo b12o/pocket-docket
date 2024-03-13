@@ -6,7 +6,7 @@ type UpdateCounterRequest struct {
 
 type User struct {
 	Id           string `db:"id" json:"id"`
-	Username     string `db:"usename" json:"username"`
+	Username     string `db:"username" json:"username"`
 	Email        string `db:"email" json:"email"`
 	PasswordHash string `db:"password_hash" json:"password_hash"`
 	PasswordSalt string `db:"password_salt" json:"password_salt"`
