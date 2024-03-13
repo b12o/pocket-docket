@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
@@ -35,10 +36,24 @@ func RegisterRoute(
 	})
 }
 
+func IsEmptyOrWhitespace(s string) bool {
+	return len(strings.TrimSpace(s)) == 0
+}
+
 func GetPocketbaseInstance(c echo.Context) (*pocketbase.PocketBase, error) {
 	app, ok := c.Get("app").(*pocketbase.PocketBase)
 	if !ok {
-		return nil, fmt.Errorf("Pocketbase instance is not avaiable")
+		return nil, fmt.Errorf("pocketbase instance is not avaiable")
 	}
 	return app, nil
 }
+
+func ContainsString(list []string, s string) bool {
+	for _, item := range list {
+		if strings.EqualFold(item, s) {
+			return true
+		}
+	}
+	return false
+}
+
