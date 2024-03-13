@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v5"
 )
@@ -124,7 +123,7 @@ func CreateTaskHandler(c echo.Context) error {
 	}
 
 	authUserId := c.Request().Header.Get("Authentication")
-	if len(strings.TrimSpace(authUserId)) == 0 {
+	if IsEmptyOrWhitespace(authUserId) {
 		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
 	}
 
@@ -137,12 +136,13 @@ func CreateTaskHandler(c echo.Context) error {
 	if err := json.NewDecoder(c.Request().Body).Decode(&newTask); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to map request body")
 	}
-	// TODO: validate content of request body. For now I'll assume it's correct cuz I'm tired
+	if err := ValidateTask(newTask); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 	newTaskRecord, err := AddTaskRecord(app, newTask)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Not yet implemented")
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
-
 	return c.JSON(http.StatusCreated, newTaskRecord)
 }
 

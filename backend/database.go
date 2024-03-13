@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/forms"
 	"github.com/pocketbase/pocketbase/models"
@@ -86,6 +88,15 @@ func DeleteUserRecord(app *pocketbase.PocketBase, record *models.Record) error {
 }
 
 // --- TASK Record Operations ---
+
+func ValidateTask(t Task) error {
+	allowedStrings := []string{"low", "medium", "high", "critical"}
+	if IsEmptyOrWhitespace(t.Title) ||
+		!ContainsString(allowedStrings, t.Priority) {
+		return fmt.Errorf("task failed validation")
+	}
+	return nil
+}
 
 func AddTaskRecord(app *pocketbase.PocketBase, newTask Task) (*models.Record, error) {
 	tasks, err := app.Dao().FindCollectionByNameOrId("tasks")
