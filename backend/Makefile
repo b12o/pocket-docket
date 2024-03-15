@@ -1,2 +1,2 @@
 serve:
-	@go run . serve
+	@go run . serve --http=localhost:8080
