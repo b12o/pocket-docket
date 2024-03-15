@@ -128,7 +128,7 @@ func CreateTaskHandler(c echo.Context) error {
 	}
 
 	if !UserExistsInCollection(app, authUserId) {
-		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist in collection 'users'")
+		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
 	}
 
 	var newTask Task
@@ -147,7 +147,29 @@ func CreateTaskHandler(c echo.Context) error {
 }
 
 func GetTaskHandler(c echo.Context) error {
-	return nil
+	app, err := GetPocketbaseInstance(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
+	}
+
+	authUserId := c.Request().Header.Get("Authentication")
+	if IsEmptyOrWhitespace(authUserId) {
+		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
+	}
+
+	if !UserExistsInCollection(app, authUserId) {
+		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
+	}
+
+	taskId := c.PathParam("taskId")
+	if !TaskExistsInCollection(app, taskId) {
+		return echo.NewHTTPError(http.StatusBadRequest, "Task does not exist")
+	}
+	taskRecord, err := GetTaskRecord(app, taskId, authUserId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "User is not authorized to access this resource.")
+	}
+	return c.JSON(http.StatusOK, taskRecord)
 }
 
 func UpdateTaskHandler(c echo.Context) error {
@@ -155,5 +177,5 @@ func UpdateTaskHandler(c echo.Context) error {
 }
 
 func DeleteTaskHandler(c echo.Context) error {
-	return c.String(http.StatusNoContent, "")
+	return nil
 }

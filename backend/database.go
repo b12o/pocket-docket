@@ -98,6 +98,11 @@ func ValidateTask(t Task) error {
 	return nil
 }
 
+func TaskExistsInCollection(app *pocketbase.PocketBase, taskId string) bool {
+	_, err := app.Dao().FindRecordById("tasks", taskId)
+	return err == nil
+}
+
 func AddTaskRecord(app *pocketbase.PocketBase, newTask Task) (*models.Record, error) {
 	tasks, err := app.Dao().FindCollectionByNameOrId("tasks")
 	if err != nil {
@@ -119,6 +124,16 @@ func AddTaskRecord(app *pocketbase.PocketBase, newTask Task) (*models.Record, er
 	}
 	return newTaskRecord, nil
 }
-func GetTaskRecord() error    { return nil }
+func GetTaskRecord(app *pocketbase.PocketBase, taskId string, userId string) (*models.Record, error) {
+	filterString := fmt.Sprintf("id='%v' && created_by='%v'", taskId, userId)
+	records, err := app.Dao().FindFirstRecordByFilter(
+		"tasks",
+		filterString,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
+}
 func UpdateTaskRecord() error { return nil }
 func DeleteTaskRecord() error { return nil }

@@ -7,8 +7,6 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
-// ---------- UTILS -----------
-
 func main() {
 
 	app := pocketbase.New()
@@ -17,9 +15,11 @@ func main() {
 	// in order for e.g DB operations to have access to the app object)
 	// so include the app context using middleware
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		e.Router.Use(InjectPocketBaseAppMiddleWare(app))
+		e.Router.Use(InjectPocketBaseAppMiddleware(app))
 		return nil
 	})
+
+	//TODO: use middleware for authentication
 
 	RegisterRoute(app, "GET", "/", RootHandler)
 
@@ -32,7 +32,7 @@ func main() {
 	RegisterRoute(app, "DELETE", "/users/:userId", DeleteUserHandler)
 
 	RegisterRoute(app, "POST", "/tasks", CreateTaskHandler)
-	RegisterRoute(app, "GET", "/task/:taskId", GetTaskHandler)
+	RegisterRoute(app, "GET", "/tasks/:taskId", GetTaskHandler)
 	RegisterRoute(app, "PATCH", "/tasks/:taskId", UpdateTaskHandler)
 	RegisterRoute(app, "DELETE", "/tasks/:taskId", DeleteTaskHandler)
 
