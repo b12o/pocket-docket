@@ -1,4 +1,4 @@
-package main
+package types
 
 type UpdateCounterRequest struct {
 	NewVal int `json:"newVal"`

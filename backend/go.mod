@@ -1,4 +1,4 @@
-module github.com/barnabasedubio/pocket-docket
+module github.com/b12o/pocket-docket
 
 go 1.22.0
 

@@ -1,4 +1,4 @@
-package main
+package middlewares
 
 import (
 	"github.com/labstack/echo/v5"

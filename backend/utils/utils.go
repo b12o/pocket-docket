@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -56,4 +56,3 @@ func ContainsString(list []string, s string) bool {
 	}
 	return false
 }
-

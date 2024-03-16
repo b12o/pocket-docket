@@ -1,8 +1,12 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/b12o/pocket-docket/data"
+	"github.com/b12o/pocket-docket/types"
+	"github.com/b12o/pocket-docket/utils"
 
 	"github.com/labstack/echo/v5"
 )
@@ -12,13 +16,13 @@ func RootHandler(c echo.Context) error {
 }
 
 func CountHandler(c echo.Context) error {
-	app, err := GetPocketbaseInstance(c)
+	app, err := utils.GetPocketbaseInstance(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 
 	if c.Request().Method == "GET" {
-		countValue, err := GetCount(app)
+		countValue, err := data.GetCount(app)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Unable to retrieve Counter value")
 		}
@@ -27,12 +31,12 @@ func CountHandler(c echo.Context) error {
 	}
 
 	if c.Request().Method == "POST" {
-		var request UpdateCounterRequest
+		var request types.UpdateCounterRequest
 		if err := c.Bind(&request); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Unable to Bind request body to struct")
 		}
 
-		if err := UpdateCount(app, request.NewVal); err != nil {
+		if err := data.UpdateCount(app, request.NewVal); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Unable to update counter")
 		}
 
@@ -45,15 +49,15 @@ func CountHandler(c echo.Context) error {
 // --- USER Handlers ---
 
 func CreateUserHandler(c echo.Context) error {
-	app, err := GetPocketbaseInstance(c)
+	app, err := utils.GetPocketbaseInstance(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
-	var newUser User
+	var newUser types.User
 	if err := json.NewDecoder(c.Request().Body).Decode(&newUser); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user format")
 	}
-	newUserRecord, err := AddUserRecord(app, newUser)
+	newUserRecord, err := data.AddUserRecord(app, newUser)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Unable to add user to collection")
 	}
@@ -61,12 +65,12 @@ func CreateUserHandler(c echo.Context) error {
 }
 
 func GetUserHandler(c echo.Context) error {
-	app, err := GetPocketbaseInstance(c)
+	app, err := utils.GetPocketbaseInstance(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 	userId := c.PathParam("userId")
-	userRecord, err := GetUserRecord(app, userId)
+	userRecord, err := data.GetUserRecord(app, userId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "User does not exist")
 	}
@@ -74,7 +78,7 @@ func GetUserHandler(c echo.Context) error {
 }
 
 func UpdateUserHandler(c echo.Context) error {
-	app, err := GetPocketbaseInstance(c)
+	app, err := utils.GetPocketbaseInstance(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
@@ -85,12 +89,12 @@ func UpdateUserHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to map request body")
 	}
 
-	userRecord, err := GetUserRecord(app, userId)
+	userRecord, err := data.GetUserRecord(app, userId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "User does not exist")
 	}
 
-	updatedUserRecord, err := UpdateUserRecord(app, userRecord, updates)
+	updatedUserRecord, err := data.UpdateUserRecord(app, userRecord, updates)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to update user record")
 	}
@@ -98,17 +102,17 @@ func UpdateUserHandler(c echo.Context) error {
 }
 
 func DeleteUserHandler(c echo.Context) error {
-	app, err := GetPocketbaseInstance(c)
+	app, err := utils.GetPocketbaseInstance(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 	userId := c.PathParam("userId")
 
-	userRecord, err := GetUserRecord(app, userId)
+	userRecord, err := data.GetUserRecord(app, userId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "User does not exist")
 	}
-	if err := DeleteUserRecord(app, userRecord); err != nil {
+	if err := data.DeleteUserRecord(app, userRecord); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "User could not be deleted")
 	}
 	return c.String(http.StatusNoContent, "")
@@ -117,29 +121,29 @@ func DeleteUserHandler(c echo.Context) error {
 // --- TASK Handlers ---
 
 func CreateTaskHandler(c echo.Context) error {
-	app, err := GetPocketbaseInstance(c)
+	app, err := utils.GetPocketbaseInstance(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 
 	authUserId := c.Request().Header.Get("Authentication")
-	if IsEmptyOrWhitespace(authUserId) {
+	if utils.IsEmptyOrWhitespace(authUserId) {
 		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
 	}
 
-	if !UserExistsInCollection(app, authUserId) {
+	_, err = data.GetUserRecord(app, authUserId)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
 	}
 
-	var newTask Task
+	var newTask types.Task
 	newTask.CreatedBy = authUserId
-	if err := json.NewDecoder(c.Request().Body).Decode(&newTask); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Failed to map request body")
+
+	if err := data.DecodeAndValidateTask(c.Request().Body, &newTask, authUserId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	if err := ValidateTask(newTask); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	newTaskRecord, err := AddTaskRecord(app, newTask)
+
+	newTaskRecord, err := data.AddTaskRecord(app, newTask)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -147,33 +151,63 @@ func CreateTaskHandler(c echo.Context) error {
 }
 
 func GetTaskHandler(c echo.Context) error {
-	app, err := GetPocketbaseInstance(c)
+	app, err := utils.GetPocketbaseInstance(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
 	}
 
 	authUserId := c.Request().Header.Get("Authentication")
-	if IsEmptyOrWhitespace(authUserId) {
+	if utils.IsEmptyOrWhitespace(authUserId) {
 		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
 	}
 
-	if !UserExistsInCollection(app, authUserId) {
+	_, err = data.GetUserRecord(app, authUserId)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
 	}
 
 	taskId := c.PathParam("taskId")
-	if !TaskExistsInCollection(app, taskId) {
-		return echo.NewHTTPError(http.StatusBadRequest, "Task does not exist")
-	}
-	taskRecord, err := GetTaskRecord(app, taskId, authUserId)
+	taskRecord, err := data.GetTaskRecord(app, taskId, authUserId)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "User is not authorized to access this resource.")
+		// either task does not exist, or was created by a different user. Return 403 for now
+		return echo.NewHTTPError(http.StatusForbidden, "")
 	}
 	return c.JSON(http.StatusOK, taskRecord)
 }
 
 func UpdateTaskHandler(c echo.Context) error {
-	return nil
+	app, err := utils.GetPocketbaseInstance(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
+	}
+
+	authUserId := c.Request().Header.Get("Authentication")
+	if utils.IsEmptyOrWhitespace(authUserId) {
+		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
+	}
+
+	_, err = data.GetUserRecord(app, authUserId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
+	}
+
+	taskId := c.PathParam("taskId")
+
+	taskRecord, err := data.GetTaskRecord(app, taskId, authUserId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Task does not exist")
+	}
+
+	var updatedTask types.Task
+	if err := data.DecodeAndValidateTask(c.Request().Body, &updatedTask, authUserId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
+	}
+
+	updatedTaskRecord, err := data.UpdateTaskRecord(app, taskRecord, &updatedTask)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to update task")
+	}
+	return c.JSON(http.StatusOK, updatedTaskRecord)
 }
 
 func DeleteTaskHandler(c echo.Context) error {
