@@ -5,32 +5,35 @@ import (
 	"net/http"
 
 	"github.com/b12o/pocket-docket/model"
-	"github.com/b12o/pocket-docket/util"
 
 	"github.com/labstack/echo/v5"
+	"github.com/pocketbase/pocketbase"
 )
 
-func HandleCreateUser(c echo.Context) error {
-	app, err := util.GetPocketbaseInstance(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
-	}
+func HandleRegisterUser(c echo.Context) error {
+	app := c.Get("app").(*pocketbase.PocketBase)
 	var newUser model.User
-	if err := json.NewDecoder(c.Request().Body).Decode(&newUser); err != nil {
+	if err := model.DecodeAndValidateUser(c.Request().Body, &newUser); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user format")
 	}
+
 	newUserRecord, err := model.AddUserRecord(app, newUser)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Unable to add user to collection")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusCreated, newUserRecord)
 }
 
-func HandleGetUser(c echo.Context) error {
-	app, err := util.GetPocketbaseInstance(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
+func HandleLogInUser(c echo.Context) error {
+	var newLogin model.Login
+	if err := model.DecodeAndValidateLogin(c.Request().Body, &newLogin); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
 	}
+	return c.JSON(http.StatusOK, "")
+}
+
+func HandleGetUser(c echo.Context) error {
+	app := c.Get("app").(*pocketbase.PocketBase)
 	userId := c.PathParam("userId")
 	userRecord, err := model.GetUserRecord(app, userId)
 	if err != nil {
@@ -40,10 +43,7 @@ func HandleGetUser(c echo.Context) error {
 }
 
 func HandleUpdateUser(c echo.Context) error {
-	app, err := util.GetPocketbaseInstance(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
-	}
+	app := c.Get("app").(*pocketbase.PocketBase)
 	userId := c.PathParam("userId")
 
 	var updates map[string]any
@@ -64,10 +64,7 @@ func HandleUpdateUser(c echo.Context) error {
 }
 
 func HandleDeleteUser(c echo.Context) error {
-	app, err := util.GetPocketbaseInstance(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
-	}
+	app := c.Get("app").(*pocketbase.PocketBase)
 	userId := c.PathParam("userId")
 
 	userRecord, err := model.GetUserRecord(app, userId)

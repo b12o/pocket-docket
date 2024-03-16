@@ -7,20 +7,18 @@ import (
 	"github.com/b12o/pocket-docket/util"
 
 	"github.com/labstack/echo/v5"
+	"github.com/pocketbase/pocketbase"
 )
 
 func HandleCreateTask(c echo.Context) error {
-	app, err := util.GetPocketbaseInstance(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
-	}
+	app := c.Get("app").(*pocketbase.PocketBase)
 
 	authUserId := c.Request().Header.Get("Authentication")
 	if util.IsEmptyOrWhitespace(authUserId) {
 		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
 	}
 
-	_, err = model.GetUserRecord(app, authUserId)
+	_, err := model.GetUserRecord(app, authUserId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
 	}
@@ -44,17 +42,14 @@ func HandleGetTasks(c echo.Context) error {
 }
 
 func HandleGetTask(c echo.Context) error {
-	app, err := util.GetPocketbaseInstance(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
-	}
+	app := c.Get("app").(*pocketbase.PocketBase)
 
 	authUserId := c.Request().Header.Get("Authentication")
 	if util.IsEmptyOrWhitespace(authUserId) {
 		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
 	}
 
-	_, err = model.GetUserRecord(app, authUserId)
+	_, err := model.GetUserRecord(app, authUserId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
 	}
@@ -69,17 +64,13 @@ func HandleGetTask(c echo.Context) error {
 }
 
 func HandleUpdateTask(c echo.Context) error {
-	app, err := util.GetPocketbaseInstance(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
-	}
+	app := c.Get("app").(*pocketbase.PocketBase)
 
 	authUserId := c.Request().Header.Get("Authentication")
 	if util.IsEmptyOrWhitespace(authUserId) {
 		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
 	}
-
-	_, err = model.GetUserRecord(app, authUserId)
+	_, err := model.GetUserRecord(app, authUserId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
 	}
@@ -104,17 +95,13 @@ func HandleUpdateTask(c echo.Context) error {
 }
 
 func HandleDeleteTask(c echo.Context) error {
-	app, err := util.GetPocketbaseInstance(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
-	}
+	app := c.Get("app").(*pocketbase.PocketBase)
 
 	authUserId := c.Request().Header.Get("Authentication")
 	if util.IsEmptyOrWhitespace(authUserId) {
 		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
 	}
-
-	_, err = model.GetUserRecord(app, authUserId)
+	_, err := model.GetUserRecord(app, authUserId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
 	}

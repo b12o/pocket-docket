@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/b12o/pocket-docket/model"
-	"github.com/b12o/pocket-docket/util"
 
 	"github.com/labstack/echo/v5"
+	"github.com/pocketbase/pocketbase"
 )
 
 func RootHandler(c echo.Context) error {
@@ -14,10 +14,7 @@ func RootHandler(c echo.Context) error {
 }
 
 func CountHandler(c echo.Context) error {
-	app, err := util.GetPocketbaseInstance(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
-	}
+	app, _ := c.Get("app").(*pocketbase.PocketBase)
 
 	if c.Request().Method == "GET" {
 		countValue, err := model.GetCount(app)
