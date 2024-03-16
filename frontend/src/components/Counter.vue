@@ -6,7 +6,7 @@ const count = ref(0);
 async function updateCounter() {
   let newVal = count.value + 3;
   try {
-    const response = await fetch("http://localhost:8090/counter", {
+    const response = await fetch("http://localhost:8080/counter", {
       method: "POST",
       body: JSON.stringify({
         newVal,
@@ -28,7 +28,7 @@ async function updateCounter() {
 onBeforeMount(async () => {
   // get counter value form server
   try {
-    const response = await fetch("http://localhost:8090/counter");
+    const response = await fetch("http://localhost:8080/counter");
     if (!response.ok) {
       console.error(`HTTP error: status code: ${response.status}`);
     } else {
