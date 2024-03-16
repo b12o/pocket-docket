@@ -77,4 +77,10 @@ func UpdateTaskRecord(app *pocketbase.PocketBase, record *models.Record, task *t
 	}
 	return record, nil
 }
-func DeleteTaskRecord() error { return nil }
+
+func DeleteTaskRecord(app *pocketbase.PocketBase, record *models.Record) error {
+	if err := app.Dao().DeleteRecord(record); err != nil {
+		return err
+	}
+	return nil
+}

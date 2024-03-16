@@ -211,5 +211,29 @@ func UpdateTaskHandler(c echo.Context) error {
 }
 
 func DeleteTaskHandler(c echo.Context) error {
-	return nil
+	app, err := utils.GetPocketbaseInstance(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Pocketbase instance is not available")
+	}
+
+	authUserId := c.Request().Header.Get("Authentication")
+	if utils.IsEmptyOrWhitespace(authUserId) {
+		return echo.NewHTTPError(http.StatusBadRequest, "Auth is missing")
+	}
+
+	_, err = data.GetUserRecord(app, authUserId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
+	}
+
+	taskId := c.PathParam("taskId")
+	taskRecord, err := data.GetTaskRecord(app, taskId, authUserId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Task does not exist")
+	}
+
+	if err := data.DeleteTaskRecord(app, taskRecord); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "User could not be deleted")
+	}
+	return c.String(http.StatusNoContent, "")
 }
