@@ -1,4 +1,4 @@
-package types
+package model
 
 type UpdateCounterRequest struct {
 	NewVal int `json:"newVal"`

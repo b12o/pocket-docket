@@ -1,14 +1,12 @@
-package data
+package model
 
 import (
-	"github.com/b12o/pocket-docket/types"
-
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/forms"
 	"github.com/pocketbase/pocketbase/models"
 )
 
-func AddUserRecord(app *pocketbase.PocketBase, newUser types.User) (*models.Record, error) {
+func AddUserRecord(app *pocketbase.PocketBase, newUser User) (*models.Record, error) {
 	users, err := app.Dao().FindCollectionByNameOrId("users")
 	if err != nil {
 		return nil, err

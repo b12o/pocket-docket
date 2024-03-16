@@ -1,19 +1,18 @@
-package data
+package model
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 
-	"github.com/b12o/pocket-docket/types"
-	"github.com/b12o/pocket-docket/utils"
+	"github.com/b12o/pocket-docket/util"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/forms"
 	"github.com/pocketbase/pocketbase/models"
 )
 
-func DecodeAndValidateTask(requestBody io.Reader, t *types.Task, userId string) error {
+func DecodeAndValidateTask(requestBody io.Reader, t *Task, userId string) error {
 	decoder := json.NewDecoder(requestBody)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(t); err != nil {
@@ -22,14 +21,14 @@ func DecodeAndValidateTask(requestBody io.Reader, t *types.Task, userId string) 
 
 	priorities := []string{"low", "medium", "high", "critical"}
 	if t.CreatedBy != userId ||
-		utils.IsEmptyOrWhitespace(t.Title) ||
-		!utils.ContainsString(priorities, t.Priority) {
+		util.IsEmptyOrWhitespace(t.Title) ||
+		!util.ContainsString(priorities, t.Priority) {
 		return fmt.Errorf("task failed validation")
 	}
 	return nil
 }
 
-func AddTaskRecord(app *pocketbase.PocketBase, newTask types.Task) (*models.Record, error) {
+func AddTaskRecord(app *pocketbase.PocketBase, newTask Task) (*models.Record, error) {
 	tasks, err := app.Dao().FindCollectionByNameOrId("tasks")
 	if err != nil {
 		return nil, err
@@ -61,7 +60,7 @@ func GetTaskRecord(app *pocketbase.PocketBase, taskId string, userId string) (*m
 	}
 	return records, nil
 }
-func UpdateTaskRecord(app *pocketbase.PocketBase, record *models.Record, task *types.Task) (*models.Record, error) {
+func UpdateTaskRecord(app *pocketbase.PocketBase, record *models.Record, task *Task) (*models.Record, error) {
 	form := forms.NewRecordUpsert(app, record)
 	form.LoadData(
 		map[string]any{
