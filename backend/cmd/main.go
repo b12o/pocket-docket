@@ -30,15 +30,16 @@ func main() {
 	util.RegisterRoute(app, "GET", "/counter", handler.CountHandler)
 	util.RegisterRoute(app, "POST", "/counter", handler.CountHandler)
 
-	util.RegisterRoute(app, "POST", "/users", handler.CreateUserHandler)
-	util.RegisterRoute(app, "GET", "/users/:userId", handler.GetUserHandler)
-	util.RegisterRoute(app, "PATCH", "/users/:userId", handler.UpdateUserHandler)
-	util.RegisterRoute(app, "DELETE", "/users/:userId", handler.DeleteUserHandler)
+	util.RegisterRoute(app, "POST", "/users", handler.HandleCreateUser)
+	util.RegisterRoute(app, "GET", "/users/:userId", handler.HandleGetUser)
+	util.RegisterRoute(app, "PATCH", "/users/:userId", handler.HandleUpdateUser)
+	util.RegisterRoute(app, "DELETE", "/users/:userId", handler.HandleDeleteUser)
 
-	util.RegisterRoute(app, "POST", "/tasks", handler.CreateTaskHandler)
-	util.RegisterRoute(app, "GET", "/tasks/:taskId", handler.GetTaskHandler)
-	util.RegisterRoute(app, "PATCH", "/tasks/:taskId", handler.UpdateTaskHandler)
-	util.RegisterRoute(app, "DELETE", "/tasks/:taskId", handler.DeleteTaskHandler)
+	util.RegisterRoute(app, "POST", "/tasks", handler.HandleCreateTask)
+	util.RegisterRoute(app, "GET", "/tasks", handler.HandleGetTasks)
+	util.RegisterRoute(app, "GET", "/tasks/:taskId", handler.HandleGetTask)
+	util.RegisterRoute(app, "PATCH", "/tasks/:taskId", handler.HandleUpdateTask)
+	util.RegisterRoute(app, "DELETE", "/tasks/:taskId", handler.HandleDeleteTask)
 
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
